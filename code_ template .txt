@@ -1,0 +1,644 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int MOD = 1e9+7;
+const double EPS = 1e-11;
+const double PI = 2 * acos(0.0);
+int CASE=0;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<pii> vii;
+typedef vector<pll> vll;
+
+#define input freopen("input.txt", "r", stdin)
+#define output freopen("output.txt", "w", stdout)
+#define fast_io ios_base::sync_with_stdio(0);cin.tie(0);
+
+#define caseNo pf("Case %d: ",++CASE)
+#define pf printf
+#define si(x) scanf("%d",&x)
+#define sl(x) scanf("%lld",&x)
+#define sii(x,y) scanf("%d %d",&x,&y)
+#define sll(x,y) scanf("%lld %lld",&x,&y)
+
+#define nl '\n'
+#define mp make_pair
+#define F first
+#define S second
+#define pb push_back
+#define ALL(v) v.begin(),v.end()
+#define uniq(a) a.erase(unique(a.begin(), a.end()), a.end())
+#define out(x) cout <<"#x = "<<x<<endl
+#define outt(x,y) cout <<x<<" "<<y<<endl
+#define mem(array,value) memset(array,value,sizeof(array))
+
+#define chkC(n) (flag[n>>6]&(1<<((n>>1)&31)))
+#define setC(n) (flag[n>>6]|=(1<<((n>>1)&31)))
+
+
+#define MX 10005
+
+
+#define MAX 46656
+#define LMT 216
+#define LEN 4830
+#define RNG 100032
+
+unsigned base[MAX/64], segment[RNG/64], primes[LEN];
+
+int fx[]={+1,-1,+0,+0};
+int fy[]={+0,+0,+1,-1};
+
+bool p[MX];
+
+void ToBinary(int n)
+{
+    if(!n)return;
+    pf(n%2);
+    ToBinary(n/2);
+}
+
+//Negative Base Number System
+string negabinary(int i)
+{
+    int reminder;
+    string digits;
+    while(i != 0)
+    {
+        reminder = i % -2;
+        i /= -2;
+        if(reminder < 0)
+        {
+            i++;
+            reminder += 2;
+        }
+        digits.push_back(reminder+'0');
+    }
+    reverse(digits.begin(),digits.end());
+    return digits;
+}
+
+//number of digits of in n!
+int factorialDigit ( int n ) {
+    double x = 0;
+    for ( int i = 1; i <= n; i++ ) {
+        x += log10 ( i );
+    }
+    int res = x + 1 + eps;
+    return res;
+}
+
+//number of digits of in n! differnet base
+int factorialDigitExtended ( int n, int base ) {
+    double x = 0;
+    for ( int i = 1; i <= n; i++ ) {
+        x += log10 ( i ) / log10(base); // Base Conversion
+    }
+    int res = x + 1 + eps;
+    return res;
+}
+
+//big integer mul////////
+int id=1;
+int solve[MX];
+void bigIntMul(int n)
+{
+    for(int i=0;i<id;i++)solve[i]*=n;
+    int carry=0,sum=0;
+    for(int i=0;i<id;i++)
+    {
+         sum=solve[i]+carry;
+         solve[i]=sum%10;
+         carry=sum/10;
+    }
+    while(carry)
+    {
+        solve[id++]=carry%10;
+        carry/=10;
+    }
+}
+
+///Big Int Sum//////////
+void bigIntSum(string a,string b)
+{
+
+    if(a.size()>b.size())swap(a,b);
+
+    len1=a.size();len2=b.size();
+    string ans="";
+    int dif=len2-len1,sum=0,carry=0;
+    for(int i=len1-1;i>=0;i--){
+        sum = ((a[i]-'0')+(b[i+dif]-'0')+carry);
+        carry=sum/10;
+        ans+= (sum%10+'0');
+    }
+    for(int i=dif-1;i>=0;i--){
+        sum = ((b[i]-'0')+carry);
+        carry=sum/10;
+        ans+= (sum%10+'0');
+    }
+    if(carry){
+        ans+=(carry+'0');
+    }
+    reverse(ALL(ans));
+
+    return ans;
+}
+
+
+////////////
+ll gcd(ll a,ll b){return (b==0)?a:gcd(b,a%b);}
+ll lcm(ll a,ll b){return (a*b)/gcd(a,b);}
+
+int gcd(int a,int b)
+{
+    while(b){
+        a%=b;
+        swap(a,b);
+    }
+    return a;
+}
+
+void sieve() {
+  ll sq = sqrt(MX);
+  for (int i = 3; i <= sq; i += 2) {
+    if (!p[i]) {
+      for (int j = i * i; j < MX; j += i + i) {
+        p[j] = 1;
+      }
+    }
+  }
+}
+
+//number of divisors 1 to n //(n*logn)
+void NOD_sieve()
+{
+    for(int i=1;i<=MX;i++){
+        for(int j=i;j<=MX;j+=i){
+            d[j]++;
+        }
+    }
+}
+
+//segment sieve
+int segmented_sieve(int a, int b)
+{
+    unsigned i,j,k,p,cnt=(a<=2&&2<=b)?1:0;
+    if(b<2) return 0;
+    if(a<3)a=3;
+    if(a%2==0)a++;
+    mem(segment,0);
+    for(i=0;primes[i]*primes[i]<=b;i++){
+        p = primes[i]*((a+primes[i]-1)/primes[i]);
+        if(p%2==0)p+=primes[i];
+        for(j=p,k=primes[i]<<1; j<=b; j+=k){ //k=prime[i]*2
+            if(j!=primes[i]){
+                setC(segment,(j-a));
+            }
+        }
+    }
+    for(i=0; i<=b-a;i+=2){
+        if(!chkC(segment, i))//cout <<i<<" "<<a+i<<endl;
+            cnt++;
+    }
+    return cnt;
+}
+
+//phi
+int phi(int n) {
+    int ans = n;
+    for (int i=2;i*i<=n;i++) {
+        if(n%i==0){
+            while(n%i==0){
+                n/=i;
+            }
+            ans-=(ans/i);
+        }
+    }
+    if(n > 1)
+        ans-=(ans/n);
+    return ans;
+}
+
+//calculate phi from 1 to n
+void Euler_Phi()
+{
+    for(ll i=1;i<MX;i++)phi[i]=i;
+
+    for(ll p=2;p<MX;p++){
+        if(phi[p]==p){ //not computed
+            phi[p]=p-1; //p prime
+
+            for(ll i=2*p;i<MX;i+=p){
+                phi[i]/=p;
+                phi[i]*=p-1;
+            }
+        }
+    }
+
+}
+//bigmod
+ll bigmod(ll n, ll p, ll m) {
+  if (p == 0) return 1;
+  ll x = bigmod(n, p / 2, m);
+  x = ((x % m) * (x % m)) % m;
+  if (p & 1) x = (x * n) % m;
+  return x;
+}
+//extended gcd
+ll egcd(ll a, ll b, ll * x, ll * y) {
+  if (a == 0) {* x = 0, * y = 1;
+    return b;
+  }
+  ll x1, y1;
+  ll g = egcd(b % a, a, & x1, & y1);* x = y1 - (b / a) * x1;* y = x1;
+  return g;
+}
+
+//Miller Rabin primality test
+
+bool MillerRabin(ll p,int k) // iterate k times
+{
+    if(p%2==0)return 0;
+
+      ll s=p-1;
+      while(s%2==0) {
+        s/=2;
+      }
+      for(int i=0;i<k;i++){
+        ll a = rand()%(p-1)+1,d=s;
+        ll mod = modulo(a,d,p);
+        while(d!=p-1&&mod!=1&&mod!=p-1){
+           mod = mul(mod,mod,p);
+          d*= 2;
+        }
+        if(mod!=p-1 && d%2==0){
+          return false;
+        }
+      }
+      return true;
+}
+
+//tri
+const int WORD=26;
+typedef struct node
+{
+    bool endmark;
+    node* next[WORD];
+    node()
+    {
+        endmark=0;
+        for(int i=0;i<WORD;i++)next[i]=NULL;
+    }
+}*nodeptr;
+//nodeptr root=new node();
+
+// calculate nCr
+ll nCr(int n, int r)
+{
+   if(n==r) return dp[n][r] = 1;
+   if(r==0) return dp[n][r] = 1;
+   if(r==1) return dp[n][r] = n;
+   if(dp[n][r]!=-1) return dp[n][r];
+   return dp[n][r] = nCr(n-1,r) + nCr(n-1,r-1);
+}
+
+void update(string s,int n,nodeptr root)
+{
+    nodeptr curr = root;
+    for(int i=0;i<n;i++){
+        int id = s[i]-'a';
+        if(curr->next[id]==NULL){
+            curr->next[id]=new node();
+        }
+        curr = curr->next[id];
+    }
+    curr->endmark = 1;
+}
+
+
+
+bool search_word(string s,int n,nodeptr root)
+{
+    nodeptr curr = root;
+    for(int i=0;i<n;i++){
+        int id = s[i]-'a';
+        if(curr->next[id]==NULL){
+            return false;
+        }
+        curr = curr->next[id];
+    }
+    return curr->endmark;
+}
+
+//segment tree
+int a[MX],tree[MX<<2];
+void build(int node,int s,int e)
+{
+    if(s==e){
+        tree[node]=a[s];
+        return;
+    }
+    int mid=(s+e)/2;
+    build(2*node+1,s,mid);
+    build(2*node+2,mid+1,e);
+    tree[node]=tree[2*node+1]+tree[2*node+2];
+}
+
+void update(int node,int s,int e,int index)
+{
+    if(index<s || index>e)return;
+    if(s==e){
+        tree[node]=0;
+        a[index]=0;
+        return;
+    }
+    int mid=(s+e)/2;
+    update(2*node+1,s,mid,index);
+    update(2*node+2,mid+1,e,index);
+    tree[node]=tree[2*node+1]+tree[2*node+2];
+}
+int query(int node,int s,int e,int l,int r)
+{
+    if(r<s||e<l)return 0; //out of range
+    if(l<=s&&e<=r){
+        return tree[node];
+    }
+    int mid=(s+e)/2;
+    ll p1=query(2*node+1,s,mid,l,r);
+    ll p2=query(2*node+2,mid+1,e,l,r);
+    return p1+p2;
+}
+
+//segment tree with lazy prop
+struct segment
+{
+    ll sum;
+    ll lazy;
+}tree[MAX<<2];
+//propagate lazy
+void prop(int node,int s,int e)
+{
+    tree[node].sum+=(e-s+1)*tree[node].lazy;
+    if(s<e){
+        tree[2*node+1].lazy+=tree[node].lazy; //update lazy
+        tree[2*node+2].lazy+=tree[node].lazy;
+    }
+    tree[node].lazy=0;
+}
+void update(int node,int s,int e,int x,int y,int val)
+{
+    prop(node,s,e);
+    if(y<s||x>e)return; //out of range
+
+    if(x<=s&&e<=y){
+        tree[node].lazy+=val;
+        return;
+    }
+    int mid=(s+e)/2;
+    update(2*node+1,s,mid,x,y,val);
+    update(2*node+2,mid+1,e,x,y,val);
+    prop(2*node+1,s,mid); //propagate
+    prop(2*node+2,mid+1,e);
+    tree[node].sum=tree[2*node+1].sum+tree[2*node+2].sum;
+}
+ll query(int node,int s,int e,int x,int y)
+{
+    prop(node,s,e); //propagate
+    if(y<s||x>e)return 0;
+    if(x<=s&&e<=y){
+        return tree[node].sum;
+    }
+    int mid=(s+e)/2;
+    ll p1=query(2*node+1,s,mid,x,y);
+    ll p2=query(2*node+2,mid+1,e,x,y);
+    return p1+p2;
+}
+
+//BIT
+
+void update(int idx,int val,int n)
+{
+    while(idx<=n){
+        tree[idx]+=val;
+        idx+= (idx&-idx);
+    }
+}
+int query(int idx) // sum of 1 to index
+{
+    int sum=0;
+    while(idx>0){
+        sum+=tree[idx];
+        idx-= (idx&-idx);
+    }
+    return sum;
+}
+
+///LCS
+int lcs(int m,int n)
+{
+   for(int i=0;i<=m;i++){
+     for(int j=0; j<=n; j++){
+         if(i==0||j==0){
+            dp[i][j]=0;
+          }
+          else if(ARR[i-1]==BRR[j-1]){
+             dp[i][j]=dp[i-1][j-1]+1;
+           }
+           else{
+              dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+           }
+        }
+   }
+   return dp[m][n];
+}
+
+/*
+In gcc/g++ fread_unlocked() is even faster.
+Can be made faster in non-object-oriented fashion with macros instead of functions.
+In contest, who cares dynamic allocation?
+*/
+ 
+struct FastRead {
+    char *buff, *ptr;
+    FastRead(int size) {
+        buff = new char[size];
+        ptr = buff;
+        fread(buff, 1, size, stdin);
+    }
+    ~FastRead() {
+        delete[] buff;
+    }
+    int nextInt() {
+        int ret = 0;
+        while(*ptr < '0' || *ptr > '9') ptr++;
+        do { ret = ret * 10 + *ptr++ - '0';
+        } while(*ptr >= '0' && *ptr <= '9');
+        return ret;
+    }
+};
+
+
+/*
+Usage: Just create an instance of it at the start of the block of
+which you want to measure running time. Reliable up to millisecond
+scale. You don't need to do anything else, even works with freopen.
+*/
+ 
+class TimeTracker {
+    clock_t start, end;
+public:
+    TimeTracker() {
+        start = clock();
+    }
+    ~TimeTracker() {
+        end = clock();
+        fprintf(stderr, "%.3lf s\n", (double)(end - start) / CLOCKS_PER_SEC);
+    }
+};
+
+/*
+finds all occurance of pattern in buffer
+buffer can be online
+*/
+ 
+char buffer[MAX], pattern[MAX];
+int overlap[MAX];
+ 
+void computeOverlap() {
+    overlap[0] = -1;
+    for(int i=0; pattern[i]; i++) {
+        overlap[i+1] = overlap[i] + 1;
+        while(overlap[i+1] > 0 && pattern[i] != pattern[overlap[i+1]-1]) {
+            overlap[i+1] = overlap[overlap[i+1]-1] + 1;
+        }
+    }
+}
+ 
+vector< int > kmpMatcher(int m) {
+    vector< int > V;
+    for(int i = 0, j = 0; buffer[i]; i++) {
+        while(true) {
+            if(buffer[i] == pattern[j]) {
+                j++;
+                if(j == m) {
+                    V.push_back(i-m+1);
+                    j = overlap[j];
+                }
+                break;
+            }
+            else if(j == 0) break;
+            else j = overlap[j];
+        }
+    }
+    return V;
+}
+
+/*
+The first one is for K = 2 and the second one is general.
+Note: first function returns 1 based index while second one is 0 based.
+*/
+ 
+int f(int n) {
+    if(n == 1) return 1;
+    return (f((n-(n&1))>>1)<<1) + ((n&1)?1:-1);
+}
+ 
+int f(int n, int k) {
+    if(n == 1) return 0;
+    return (f(n-1, k) + k)%n;
+}
+
+/*
+update and query function for 2D bit.
+MAX is the maximum possible value.
+bit[][] holds the 2D binary indexed tree
+*/
+ 
+void update(int x, int y, int v) {
+    int y1;
+    while(x <= MAX) {
+        y1 = y;
+        while(y1 <= MAX) {
+            bit[x][y1] += v;
+            y1 += (y1 & -y1);
+        }
+        x += (x & -x);
+    }
+}
+ 
+int readsum(int x, int y) {
+    int v = 0, y1;
+    while(x > 0) {
+        y1 = y;
+        while(y1 > 0) {
+            v += bit[x][y1];
+            y1 -= (y1 & -y1);
+        }
+        x -= (x & -x);
+    }
+    return v;
+}
+
+
+// matrix expo
+class Matrix{
+    public:
+        int row,col;
+        ll m[MX][MX];
+        Matrix()
+        {   row=2,col=2;
+            for(int i=0;i<row;i++){
+                for(int j=0;j<col;j++){
+                    m[i][j]=0;
+                }
+            }
+        }
+        Matrix(int a,int b)
+        { //constructor
+            row=a,col=b;
+            for(int i=0;i<row;i++){
+                for(int j=0;j<col;j++){
+                    m[i][j]=0;
+                }
+            }
+        }
+        void show()
+        {
+            for(int i=0;i<row;i++){
+                for(int j=0;j<col;j++){
+                    cout << m[i][j]<<" ";
+                }cout <<endl;
+            }
+        }
+};
+
+ll multiply(ll a,ll b)
+{
+    return ((a%MOD)*(b%MOD))%MOD;
+}
+Matrix matrixMul(Matrix a,Matrix b)
+{
+    Matrix ans=Matrix(a.row,b.col);
+    for(int k=0;k<a.row;k++){
+        for(int i=0;i<a.col;i++){
+            for(int j=0;j<b.col;j++){
+                ans.m[k][j]=(ans.m[k][j]%MOD+ multiply(a.m[k][i],b.m[i][j]))%MOD;
+            }
+        }
+    }
+    return ans;
+}
+Matrix bigmod(Matrix mat,int p)
+{
+    if(p<=1)return mat;
+    Matrix x=bigmod(mat,p/2);
+    x=matrixMul(x,x);
+    if(p&1){
+        x=matrixMul(x,mat);
+    }
+    return x;
+}
