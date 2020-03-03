@@ -1,1 +1,1 @@
-# Template
+# C++ Template
